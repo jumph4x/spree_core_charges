@@ -5,27 +5,48 @@ module SpreeCoreCharges
   class Engine < Rails::Engine
   
     def self.activate
-#      Dir.glob(File.join(File.dirname(__FILE__), "../app/models/*.rb")) do |c|
-#        Rails.env.production? ? require(c) : load(c)
-#      end
-      
       Adjustment.class_eval do 
         scope :core, lambda { where('label like ?',"#{I18n.t(:core_charge)}%") }
       end
       
+      LineItem.class_eval do
+        
+        def update_adjustment(adjustment, source)
+          adjustment.amount = if adjustment.order.line_items.include? source
+            calculate_core_charge
+          else
+            0
+          end
+        end
+        
+        def calculate_core_charge
+          return unless product.core_amount
+          
+          self.quantity * product.core_amount
+        end
+        
+      end
+      
+      Order.register_update_hook('create_core_charges')
+      
       Order.class_eval do
-        #has_many :core_charges
-        before_save :update_core_charges
+
+        has_many :core_charges,
+                 :dependent => :destroy,
+                 :class_name => 'Adjustment',
+                 :conditions => "source_type='LineItem'"
         
       private
       
-        def update_core_charges
-          line_items.collect{|item| item if item.variant.product.core_amount }.compact.each do |item|
-            adjustments << CoreCharge.create({
+        def create_core_charges
+          line_items(true).collect{|item| item if item.variant.product.core_amount }.compact.each do |item|
+            adjustments << Adjustment.create({
                 :label => I18n.t(:core_charge) + " [#{item.variant.sku || item.variant.name}]",
                 :source => item,
-                :order => self
-            }) unless adjustments.find(:first, :conditions => {:source_id => item.id})
+                :order => self,
+                :originator => item,
+                :amount => item.calculate_core_charge
+            }) unless core_charges.find(:first, :conditions => {:source_id => item.id})
           end
         end
         
