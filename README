@@ -1,0 +1,4 @@
+Core Charges Extension for Spree [0.50.0+?]
+==============================================
+
+Basic extensions allowing to attach core charges to products and have those charges automatically appear on the order.
