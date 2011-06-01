@@ -1,10 +1,11 @@
 require 'spree_core'
-require 'core_charges_hooks'
+require 'core_charges_overrides'
 
 module SpreeCoreCharges
   class Engine < Rails::Engine
   
     def self.activate
+    
       Adjustment.class_eval do 
         scope :core, lambda { where('label like ?',"#{I18n.t(:core_charge)}%") }
       end
