@@ -13,7 +13,7 @@ module SpreeCoreCharges
       LineItem.class_eval do
         
         def update_adjustment(adjustment, source)
-          adjustment.amount = if adjustment.order.line_items.include? source
+          adjustment.amount = if adjustment.order(true).line_items.include? source
             calculate_core_charge
           else
             0
