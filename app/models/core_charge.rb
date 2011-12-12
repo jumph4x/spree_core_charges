@@ -4,6 +4,9 @@ class CoreCharge < ::Adjustment
   
   before_validation :set_amount
 
+  after_save :update_order
+  after_destroy :update_order
+
   # We check if core charges even apply to this order
   # For this we see if any associated products have their core amounts set
   def applicable?
@@ -17,7 +20,13 @@ class CoreCharge < ::Adjustment
 
   # Calculates core charges by summing relevant ones
   def set_amount
-    self.amount = source.variant.product.core_amount * source.quantity
+    self.amount ||= source.variant.product.core_amount * source.quantity
   end
 
+private
+
+  def update_order
+    order.update!
+  end
+  
 end
