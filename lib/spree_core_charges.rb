@@ -40,19 +40,34 @@ module SpreeCoreCharges
       private
       
         def create_core_charges
+          CoreCharge.skip_callback :save, :after, :update_order
+        
           line_items(true).collect{|item| item if item.variant.product.core_amount }.compact.each do |item|
-            adjustments << Adjustment.create({
+            adjustments << CoreCharge.create({
                 :label => I18n.t(:core_charge) + " [#{item.variant.sku || item.variant.name}]",
                 :source => item,
                 :order => self,
                 :originator => item,
                 :amount => item.calculate_core_charge
-            }) unless core_charges.find(:first, :conditions => {:source_id => item.id})
+            }) unless core_charges.find(:first, :conditions => {:source_id => item.id, :originator_id => item.id})
           end
+          
+          CoreCharge.set_callback :save, :after, :update_order
+          
+          self.update!
         end
         
       end
-            
+      
+      methodz = CoreCharge._save_callbacks.select{|c| c.raw_filter.class == Symbol}
+      CoreCharge.reset_callbacks :save
+      
+      methodz.each do |methud|
+        CoreCharge.set_callback :save, methud.kind, methud.raw_filter
+      end
+      
+      
+      
     end
     
     config.autoload_paths += %W(#{config.root}/lib)
