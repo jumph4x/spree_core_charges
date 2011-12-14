@@ -18,6 +18,8 @@ module SpreeCoreCharges
           else
             0
           end
+          
+          adjustment.save
         end
         
         def calculate_core_charge
@@ -26,47 +28,59 @@ module SpreeCoreCharges
           self.quantity * product.core_amount
         end
         
-      end
+      private
+        
+        def create_core_charges
+          order.core_charges << CoreCharge.create({
+            :label =>  "#{I18n.t(:core_charge)} [#{variant.sku}]",
+            :source => self,
+            :order => order,
+            :originator => self,
+            :amount => calculate_core_charge
+          }) unless order.core_charges.detect{|cc| cc.source_id == id}
+        end
+        
+        def destroy_core_charges
+          order.core_charges.select{|cc| cc.source_id == id}.map(&:destroy)
+          
+          order.update!
+        end
+        
+        def update_core_charges
+          return order.update! unless self.product.core_amount
+
+          if self.destroyed?
+            destroy_core_charges
+          elsif 
+            create_core_charges
+          end
+        end
       
-      Order.register_update_hook('create_core_charges')
+        def update_order
+          # update the order totals, etc.
+          update_core_charges
+          
+          # implied in the above action
+          #order.update!
+        end
+      
+      end
       
       Order.class_eval do
 
         has_many :core_charges,
                  :dependent => :destroy,
-                 :class_name => 'Adjustment',
+                 #:class_name => 'Adjustment',
                  :conditions => "source_type='LineItem'"
         
-      private
-      
-        def create_core_charges
-          CoreCharge.skip_callback :save, :after, :update_order
-        
-          line_items(true).collect{|item| item if item.variant.product.core_amount }.compact.each do |item|
-            adjustments << CoreCharge.create({
-                :label => I18n.t(:core_charge) + " [#{item.variant.sku || item.variant.name}]",
-                :source => item,
-                :order => self,
-                :originator => item,
-                :amount => item.calculate_core_charge
-            }) unless core_charges.find(:first, :conditions => {:source_id => item.id, :originator_id => item.id})
-          end
-          
-          CoreCharge.set_callback :save, :after, :update_order
-          
-          self.update!
-        end
-        
       end
       
-      methodz = CoreCharge._save_callbacks.select{|c| c.raw_filter.class == Symbol}
-      CoreCharge.reset_callbacks :save
-      
-      methodz.each do |methud|
-        CoreCharge.set_callback :save, methud.kind, methud.raw_filter
-      end
-      
-      
+#      methodz = CoreCharge._save_callbacks.select{|c| c.raw_filter.class == Symbol}
+#      CoreCharge.reset_callbacks :save
+#      
+#      methodz.each do |methud|
+#        CoreCharge.set_callback :save, methud.kind, methud.raw_filter
+#      end
       
     end
     
