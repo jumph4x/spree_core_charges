@@ -15,12 +15,12 @@ class CoreCharge < ::Adjustment
 
   def update!
     set_amount
-    save!
+    save
   end
 
   # Calculates core charges by summing relevant ones
   def set_amount
-    self.amount ||= source.variant.product.core_amount * source.quantity
+    self.amount = (source.product.core_amount * source.quantity)
   end
 
 private
