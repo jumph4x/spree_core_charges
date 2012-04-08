@@ -1,4 +1,4 @@
-class CoreCharge < ::Adjustment
+class Spree::CoreCharge < Spree::Adjustment
   belongs_to :order
   scope :with_order, :conditions => "order_id IS NOT NULL"
   

@@ -1,8 +1,8 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-describe CoreCharge do
+describe Spree::CoreCharge do
   before(:each) do
-    @core_charge = CoreCharge.new
+    @core_charge = Spree::CoreCharge.new
   end
 
   it "should be valid" do
