@@ -28,7 +28,7 @@ module SpreeCoreCharges
         
         def calculate_core_charge
           return unless product.core_amount
-          - self.quantity * product.core_amount
+          self.quantity * product.core_amount
         end
         
       private
