@@ -1,16 +1,16 @@
 Spree::LineItem.class_eval do
-  def update_adjustment(adjustment, source)
-    current_amount = adjustment.amount
-    adjustment.amount = if adjustment.adjustable(true).line_items.include? adjustment.source
+  def update_adjustment(adjustment, source) #source being the order
+    new_amount = if adjustment.originator and source.line_items.include? adjustment.originator
       calculate_core_charge
     else
       0
     end
-    if current_amount != adjustment.amount
-      Spree::Adjustment.skip_callback :save, :after, :update_adjustable
-      adjustment.save
-      Spree::Adjustment.set_callback :save, :after, :update_adjustable
-    end
+
+    adjustment.update_attribute_without_callbacks(:amount, new_amount)
+     
+   # Spree::Adjustment.skip_callback :save, :after, :update_adjustable
+   # adjustment.save
+   # Spree::Adjustment.set_callback :save, :after, :update_adjustable
    end
   
   def eligible?(source = nil)
