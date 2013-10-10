@@ -13,7 +13,7 @@ Spree::Order.class_eval do
       next if core_variant_ids.include? li.variant_id # The charge for this line item already exists
 
       new_core_charge = Spree::Adjustment.new
-      new_core_charge.label = "#{I18n.t(:core_charge)} [#{li.variant.sku}]"
+      new_core_charge.label = "#{Spree.t(:core_charge)} [#{li.variant.sku}]"
       new_core_charge.source = li
       new_core_charge.adjustable = self
       new_core_charge.originator = li

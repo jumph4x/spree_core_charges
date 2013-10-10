@@ -1,5 +1,6 @@
 en:
-  core_charge: "Core charge"
-  core_charges: "Core charges"
-  core_amount: "Core deposit amount"
-  core_charge_total: "Core charge total"
+  spree:
+    core_charge: "Core charge"
+    core_charges: "Core charges"
+    core_amount: "Core deposit amount"
+    core_charge_total: "Core charge total"
