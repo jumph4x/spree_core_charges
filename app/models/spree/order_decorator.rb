@@ -27,7 +27,7 @@ Spree::Order.class_eval do
 
     update_totals
 
-    update_attributes_without_callbacks({
+    update_columns({
       :adjustment_total => adjustment_total,
       :total => total
     })

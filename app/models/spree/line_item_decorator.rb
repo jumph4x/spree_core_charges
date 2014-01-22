@@ -6,7 +6,7 @@ Spree::LineItem.class_eval do
       0
     end
 
-    adjustment.update_attribute_without_callbacks(:amount, new_amount)
+    adjustment.update_column(:amount, new_amount)
      
    # Spree::Adjustment.skip_callback :save, :after, :update_adjustable
    # adjustment.save
