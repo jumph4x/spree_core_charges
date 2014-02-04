@@ -1,6 +1,6 @@
 Spree::LineItem.class_eval do
-  def update_adjustment(adjustment, source) #source being the order
-    new_amount = if adjustment.originator and source.line_items.include? adjustment.originator
+  def update_adjustment adjustment, source
+    new_amount = if adjustment.originator and source.order.line_items.include? adjustment.originator
       calculate_core_charge
     else
       0
