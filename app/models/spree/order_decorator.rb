@@ -1,12 +1,12 @@
 Spree::Order.class_eval do
 
-  # Called each time an orderis updated
+  # Called each time an order is updated
   def create_core_charges
     to_keep, to_destroy = adjustments.core.partition{|x| x.originator and x.originator.eligible?}
     to_destroy.each(&:delete)
     core_variant_ids = to_keep.map{|x| x.originator.variant_id }
 
-    Spree::Adjustment.skip_callback :save, :after, :update_adjustable
+    Spree::Adjustment.skip_callback :save, :after, :update_adjustable_adjustment_total
 
     line_items.each do |li|
       next unless li.product.core_amount # The product has no core charge associated with it
@@ -23,7 +23,7 @@ Spree::Order.class_eval do
       new_core_charge.save
     end
 
-    Spree::Adjustment.set_callback :save, :after, :update_adjustable
+    Spree::Adjustment.set_callback :save, :after, :update_adjustable_adjustment_total
 
     update_totals
 
