@@ -16,7 +16,6 @@ Spree::Order.class_eval do
       new_core_charge.label = "#{Spree.t(:core_charge)} [#{li.variant.sku}]"
       new_core_charge.source = li
       new_core_charge.adjustable = self
-      new_core_charge.originator = li
       new_core_charge.amount = li.calculate_core_charge
       new_core_charge.eligible = true
 
